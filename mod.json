@@ -1,5 +1,5 @@
 {
-	"geode": "3.2.0",
+	"geode": "3.4.0",
 	"gd": {
 		"win": "2.206",
 		"android": "2.206",
@@ -7,10 +7,15 @@
 	},
 	"id": "alphalaneous.unlog",
 	"name": "Unlog",
-	"version": "v1.0.0",
+	"version": "v1.0.1",
 	"developer": "Alphalaneous",
 	"description": "Toggle logs for individual mods",
 	"early-load": true,
+	"links": {
+        "homepage": "https://twitter.com/alphalaneous",
+        "source": "https://github.com/Alphalaneous/Unlog",
+        "community": "https://discord.gg/Txn2CA5dHF"
+    },
 	"resources": {
 		"sprites": [
 			"resources/*"
