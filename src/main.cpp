@@ -29,12 +29,11 @@ class $modify(ModsLayerExt, CCLayer) {
 				logsBtn->setID("mods-logs-button");
 				actionsMenu->addChild(logsBtn);
 				actionsMenu->updateLayout();
-
 			}
 		}
 	}
 
-	$override bool init() {
+	bool init() {
 
 		this->scheduleOnce(
 			schedule_selector(ModsLayerExt::tryCustomSetup), 0.f
