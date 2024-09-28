@@ -1,3 +1,6 @@
+# 1.1.2 
+- Use typeinfo_cast to check layer, and queueInMainThread to happen one frame after to safely fix button appearing too late
+
 # 1.1.1 
 - Don't use other way to modify mods layer (unfix button appear too late)
 

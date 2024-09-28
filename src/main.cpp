@@ -4,17 +4,17 @@
 
 using namespace geode::prelude;
 
-#include <Geode/modify/CCDirector.hpp>
-class $modify(MyCCDirector, CCDirector) {
+#include <Geode/modify/CCLayer.hpp>
 
-	bool replaceScene(CCScene* scene) {
-		if (!CCDirector::replaceScene(scene)) return false;
-		if(scene->getChildrenCount() == 0) return true;
+class ModsLayer : public CCNode {};
 
-		bool geodeTheme = Loader::get()->getLoadedMod("geode.loader")->getSettingValue<bool>("enable-geode-theme");
-		if(CCNode* node = getChildOfType<CCNode>(scene, 0)){
-			if(node->getID() == "ModsLayer"){
-				if (CCMenu* actionsMenu = typeinfo_cast<CCMenu*>(node->getChildByID("actions-menu"))) {
+class $modify(ModsLayerExt, CCLayer) {	
+    bool init() {
+    	if (!CCLayer::init()) return false;
+		if (typeinfo_cast<ModsLayer*>(this)) {
+			queueInMainThread([this] {
+				bool geodeTheme = Loader::get()->getLoadedMod("geode.loader")->getSettingValue<bool>("enable-geode-theme");
+				if (CCMenu* actionsMenu = typeinfo_cast<CCMenu*>(getChildByID("actions-menu"))) {
 
 					CCSprite* spr = CircleButtonSprite::createWithSprite(
 						"terminal.png"_spr, .85f,
@@ -31,7 +31,7 @@ class $modify(MyCCDirector, CCDirector) {
 					actionsMenu->addChild(logsBtn);
 					actionsMenu->updateLayout();
 				}
-			}
+			});
 		}
 		return true;
 	}
