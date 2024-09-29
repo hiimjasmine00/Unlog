@@ -37,7 +37,7 @@ class $modify(ModsLayerExt, CCLayer) {
 	}
 };
 
-$execute {
+$on_mod(Loaded) {
 	for(Mod* mod : Loader::get()->getAllMods()){
 		auto value = Mod::get()->getSavedValue<bool>(mod->getID(), true);
 		mod->setLoggingEnabled(value);
