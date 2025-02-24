@@ -1,3 +1,6 @@
+# 1.1.5
+- Add tags
+
 # 1.1.3
 - Use $on_mod(Loaded) instead of $execute
 
