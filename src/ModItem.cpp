@@ -81,7 +81,7 @@ bool ModItem::init(Mod* mod, CCSize const& size) {
     menu->setAnchorPoint({1.0f, 0.5f});
     menu->setContentSize({ padding_left, size.height});
 
-    auto& unlogData = UnlogData::data[mod->getID()];
+    auto& unlogData = UnlogData::data->operator[](mod->getID());
 
     for (int i = 3; i >= 0; i--) {
         auto toggle = CCMenuItemToggler::createWithStandardSprites(
@@ -130,7 +130,7 @@ bool ModItem::init(Mod* mod, CCSize const& size) {
 }
 
 void ModItem::onToggle(CCObject* sender){
-    UnlogData::data[m_mod->getID()][sender->getTag()] = !static_cast<CCMenuItemToggler*>(sender)->isToggled();
+    UnlogData::data->operator[](m_mod->getID())[sender->getTag()] = !static_cast<CCMenuItemToggler*>(sender)->isToggled();
 }
 
 ModItem* ModItem::create(Mod* mod, CCSize const& size) {

@@ -39,26 +39,35 @@ class $modify(ModsLayerExt, CCLayer) {
 };
 
 void vlogImplHook(Severity severity, Mod* mod, fmt::string_view format, fmt::format_args args) {
-	if (UnlogData::data[mod->getID()][severity]) {
+	if (UnlogData::data->operator[](mod->getID())[severity]) {
 		log::vlogImpl(severity, mod, format, args);
 	}
 }
 
+static Hook* s_hook = nullptr;
+
 $on_mod(Loaded) {
 	Mod* mod = Mod::get();
+	auto& unlogData = *UnlogData::data;
 	if (!mod->getSaveContainer().contains("unlog-data")) {
 		for (Mod* mod : Loader::get()->getAllMods()) {
-			UnlogData::data[mod->getID()] = mod->getSavedValue(mod->getID(), true);
+			unlogData[mod->getID()] = mod->getSavedValue(mod->getID(), true);
 		}
-		mod->setSavedValue("unlog-data", UnlogData::data);
+		mod->setSavedValue("unlog-data", unlogData);
 	}
 	else {
-		UnlogData::data = mod->getSavedValue<UnlogData::Map>("unlog-data");
+		unlogData = mod->getSavedValue<UnlogData::Map>("unlog-data");
 	}
 
 	(void) mod->hook(
 		reinterpret_cast<void*>(addresser::getNonVirtual(&log::vlogImpl)),
 		&vlogImplHook,
 		"geode::log::vlogImpl"
-	);
+	).inspect([](Hook* hook) {
+		s_hook = hook;
+	});
+}
+
+$on_mod(DataSaved) {
+	if (s_hook) (void) s_hook->disable();
 }

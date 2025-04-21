@@ -3,7 +3,7 @@
 struct UnlogData {
     typedef std::unordered_map<std::string, UnlogData> Map;
 
-    inline static Map data;
+    inline static Map* data = new Map();
 
     UnlogData() : debug(true), info(true), warn(true), error(true) {}
     UnlogData(bool value) : debug(value), info(value), warn(value), error(value) {}

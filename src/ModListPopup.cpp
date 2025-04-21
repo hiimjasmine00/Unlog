@@ -35,7 +35,7 @@ bool ModListPopup::setup() {
 }
 
 void ModListPopup::onClose(cocos2d::CCObject*){
-    Mod::get()->setSavedValue("unlog-data", UnlogData::data);
+    Mod::get()->setSavedValue("unlog-data", *UnlogData::data);
     this->setKeypadEnabled(false);
     this->setTouchEnabled(false);
     this->removeFromParentAndCleanup(true);
