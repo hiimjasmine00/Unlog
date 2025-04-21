@@ -38,8 +38,16 @@ class $modify(ModsLayerExt, CCLayer) {
 	}
 };
 
+#ifdef GEODE_IS_ARM_MAC
+$on_mod(Loaded) {
+	for(Mod* mod : Loader::get()->getAllMods()){
+		auto value = Mod::get()->getSavedValue<bool>(mod->getID(), true);
+		mod->setLoggingEnabled(value);
+	}
+}
+#else
 void vlogImplHook(Severity severity, Mod* mod, fmt::string_view format, fmt::format_args args) {
-	if (UnlogData::data->operator[](mod->getID())[severity]) {
+	if (UnlogData::data->operator[](mod->getID()).get(severity)) {
 		log::vlogImpl(severity, mod, format, args);
 	}
 }
@@ -71,3 +79,4 @@ $on_mod(Loaded) {
 $on_mod(DataSaved) {
 	if (s_hook) (void) s_hook->disable();
 }
+#endif

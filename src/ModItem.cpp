@@ -54,7 +54,11 @@ bool ModItem::init(Mod* mod, CCSize const& size) {
     nameLabel->setScale(0.4f);
     nameLabel->setAnchorPoint({ 0.0f, 0.5f });
 
+    #ifdef GEODE_IS_ARM_MAC
+    constexpr float padding_left = 60.000f;
+    #else
     constexpr float padding_left = 100.000f;
+    #endif
 
     this->addChildAtPosition(
         nameLabel,
@@ -81,6 +85,19 @@ bool ModItem::init(Mod* mod, CCSize const& size) {
     menu->setAnchorPoint({1.0f, 0.5f});
     menu->setContentSize({ padding_left, size.height});
 
+    #ifdef GEODE_IS_ARM_MAC
+    auto toggle = CCMenuItemToggler::createWithStandardSprites(
+        this, menu_selector(ModItem::onToggle), .6f
+    );
+    
+    toggle->toggle(mod->isLoggingEnabled());
+
+    menu->addChildAtPosition(
+        toggle,
+        Anchor::Right,
+        { 0, 0 }
+    );
+    #else
     auto& unlogData = UnlogData::data->operator[](mod->getID());
 
     for (int i = 3; i >= 0; i--) {
@@ -88,13 +105,14 @@ bool ModItem::init(Mod* mod, CCSize const& size) {
             this, menu_selector(ModItem::onToggle), .6f
         );
         toggle->setTag(i);
-        toggle->toggle(unlogData[i]);
+        toggle->toggle(unlogData.get(i));
         menu->addChildAtPosition(
             toggle,
             Anchor::Right,
             { 0, 0 }
         );
     }
+    #endif
 
     auto layout = RowLayout::create();
     layout->setDefaultScaleLimits(0.5f, 0.7f);
@@ -102,14 +120,20 @@ bool ModItem::init(Mod* mod, CCSize const& size) {
     layout->setAxisReverse(true);
     menu->setLayout(layout);
 
+    #ifdef GEODE_IS_ARM_MAC
+    constexpr float y = 0.0f;
+    #else
+    constexpr float y = -3.0f;
+    #endif
     this->addChildAtPosition(
         menu,
         Anchor::Right,
-        { -3, -3 }
+        { -3, y }
     );
 
     nameLabel->limitLabelWidth(menu->getPositionX() - menu->getContentWidth() - nameLabel->getPositionX() - 5, .4f, .01f);
 
+    #ifndef GEODE_IS_ARM_MAC
     constexpr std::array labels = {
         "Debug",
         "Info",
@@ -125,12 +149,19 @@ bool ModItem::init(Mod* mod, CCSize const& size) {
 
         this->addChild(label);
     }
+    #endif
 
     return true;
 }
 
 void ModItem::onToggle(CCObject* sender){
-    UnlogData::data->operator[](m_mod->getID())[sender->getTag()] = !static_cast<CCMenuItemToggler*>(sender)->isToggled();
+    auto toggled = !static_cast<CCMenuItemToggler*>(sender)->isToggled();
+    #ifdef GEODE_IS_ARM_MAC
+    m_mod->setLoggingEnabled(toggled);
+    Mod::get()->setSavedValue(Mod::get()->getID(), toggled);
+    #else
+    UnlogData::data->operator[](m_mod->getID()).get(sender->getTag()) = toggled;
+    #endif
 }
 
 ModItem* ModItem::create(Mod* mod, CCSize const& size) {

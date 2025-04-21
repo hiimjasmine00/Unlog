@@ -23,7 +23,12 @@ bool ModListPopup::setup() {
     this->setTitle("Mod Logs:");
     m_title->limitLabelWidth(m_mainLayer->getContentSize().width - 50, .7f, .1f);
 
-    ModList* list = ModList::create(Loader::get()->getAllMods(), {340.f, 150.f});
+    #ifdef GEODE_IS_ARM_MAC
+    constexpr float width = 240.f;
+    #else
+    constexpr float width = 340.f;
+    #endif
+    ModList* list = ModList::create(Loader::get()->getAllMods(), {width, 150.f});
 
     m_mainLayer->addChildAtPosition(
         list,
@@ -35,7 +40,9 @@ bool ModListPopup::setup() {
 }
 
 void ModListPopup::onClose(cocos2d::CCObject*){
+    #ifndef GEODE_IS_ARM_MAC
     Mod::get()->setSavedValue("unlog-data", *UnlogData::data);
+    #endif
     this->setKeypadEnabled(false);
     this->setTouchEnabled(false);
     this->removeFromParentAndCleanup(true);
@@ -43,7 +50,12 @@ void ModListPopup::onClose(cocos2d::CCObject*){
 
 ModListPopup* ModListPopup::create() {
     auto ret = new ModListPopup();
-    if (ret->init(380.f, 200.f)) {
+    #ifdef GEODE_IS_ARM_MAC
+    constexpr float width = 280.f;
+    #else
+    constexpr float width = 380.f;
+    #endif
+    if (ret->init(width, 200.f)) {
         ret->autorelease();
         return ret;
     }

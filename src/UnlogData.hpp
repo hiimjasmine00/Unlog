@@ -8,9 +8,8 @@ struct UnlogData {
     UnlogData() : debug(true), info(true), warn(true), error(true) {}
     UnlogData(bool value) : debug(value), info(value), warn(value), error(value) {}
     UnlogData(bool debug, bool info, bool warn, bool error) : debug(debug), info(info), warn(warn), error(error) {}
-    UnlogData(const UnlogData&) = default;
 
-    bool& operator[](int severity) {
+    bool& get(int severity) {
         switch (severity) {
             case geode::Severity::Debug: return debug;
             case geode::Severity::Info: return info;
@@ -36,14 +35,14 @@ struct matjson::Serialize<UnlogData::Map> {
         UnlogData::Map map;
         for (const auto& [key, val] : value) {
             if (!val.isObject()) {
-                return geode::Err(fmt::format("Invalid JSON format for key '{}', expected an object", key));
+                return geode::Err("Invalid JSON format for key '{}', expected an object", key);
             }
 
             map[key] = {
-                value["debug"].asBool().unwrapOr(true),
-                value["info"].asBool().unwrapOr(true),
-                value["warn"].asBool().unwrapOr(true),
-                value["error"].asBool().unwrapOr(true)
+                val["debug"].asBool().unwrapOr(true),
+                val["info"].asBool().unwrapOr(true),
+                val["warn"].asBool().unwrapOr(true),
+                val["error"].asBool().unwrapOr(true)
             };
         }
 
