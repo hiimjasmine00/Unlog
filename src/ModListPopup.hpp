@@ -9,5 +9,5 @@ protected:
     bool init(float width, float height);
 public:
     static ModListPopup* create();
-    void onClose(cocos2d::CCObject*);
+    void onClose(cocos2d::CCObject*) override;
 };

@@ -1,4 +1,5 @@
 #include "ModItem.hpp"
+#include "UnlogData.hpp"
 #include <Geode/utils/ColorProvider.hpp>
 #include <Geode/ui/GeodeUI.hpp>
 
@@ -50,21 +51,10 @@ bool ModItem::init(Mod* mod, CCSize const& size) {
         "bigFont.fnt"
     );
 
-    m_toggle = CCMenuItemToggler::createWithStandardSprites(
-        this, menu_selector(ModItem::onToggle), .6f
-    );
-    
-    m_toggle->toggle(mod->isLoggingEnabled());
-
     nameLabel->setScale(0.4f);
     nameLabel->setAnchorPoint({ 0.0f, 0.5f });
 
-    constexpr float padding_left = 60.000f;
-
-    float calc = size.width - padding_left;
-    if (nameLabel->getScaledContentWidth() >= calc) {
-        nameLabel->setScale(calc / nameLabel->getContentWidth());
-    }
+    constexpr float padding_left = 100.000f;
 
     this->addChildAtPosition(
         nameLabel,
@@ -90,11 +80,21 @@ bool ModItem::init(Mod* mod, CCSize const& size) {
     auto menu = CCMenu::create();
     menu->setAnchorPoint({1.0f, 0.5f});
     menu->setContentSize({ padding_left, size.height});
-    menu->addChildAtPosition(
-        m_toggle,
-        Anchor::Right,
-        { 0, 0 }
-    );
+
+    auto& unlogData = UnlogData::data[mod->getID()];
+
+    for (int i = 3; i >= 0; i--) {
+        auto toggle = CCMenuItemToggler::createWithStandardSprites(
+            this, menu_selector(ModItem::onToggle), .6f
+        );
+        toggle->setTag(i);
+        toggle->toggle(unlogData[i]);
+        menu->addChildAtPosition(
+            toggle,
+            Anchor::Right,
+            { 0, 0 }
+        );
+    }
 
     auto layout = RowLayout::create();
     layout->setDefaultScaleLimits(0.5f, 0.7f);
@@ -105,15 +105,32 @@ bool ModItem::init(Mod* mod, CCSize const& size) {
     this->addChildAtPosition(
         menu,
         Anchor::Right,
-        { -3, 0 }
+        { -3, -3 }
     );
+
+    nameLabel->limitLabelWidth(menu->getPositionX() - menu->getContentWidth() - nameLabel->getPositionX() - 5, .4f, .01f);
+
+    constexpr std::array labels = {
+        "Debug",
+        "Info",
+        "Warn",
+        "Error"
+    };
+
+    for (auto toggle : CCArrayExt<CCMenuItemToggler*>(menu->getChildren())) {
+        auto label = CCLabelBMFont::create(labels[toggle->getTag()], "bigFont.fnt");
+
+        label->setScale(0.2f);
+        label->setPosition(this->convertToNodeSpace(menu->convertToWorldSpace(toggle->getPosition())) + CCPoint{ 0, 11 });
+
+        this->addChild(label);
+    }
 
     return true;
 }
 
 void ModItem::onToggle(CCObject* sender){
-    m_mod->setLoggingEnabled(!m_toggle->isToggled());
-    Mod::get()->setSavedValue<bool>(m_mod->getID(), !m_toggle->isToggled());
+    UnlogData::data[m_mod->getID()][sender->getTag()] = !static_cast<CCMenuItemToggler*>(sender)->isToggled();
 }
 
 ModItem* ModItem::create(Mod* mod, CCSize const& size) {

@@ -1,6 +1,7 @@
 #include <Geode/Geode.hpp>
 #include <Geode/ui/GeodeUI.hpp>
 #include "ModListPopup.hpp"
+#include "UnlogData.hpp"
 
 using namespace geode::prelude;
 
@@ -37,9 +38,27 @@ class $modify(ModsLayerExt, CCLayer) {
 	}
 };
 
-$on_mod(Loaded) {
-	for(Mod* mod : Loader::get()->getAllMods()){
-		auto value = Mod::get()->getSavedValue<bool>(mod->getID(), true);
-		mod->setLoggingEnabled(value);
+void vlogImplHook(Severity severity, Mod* mod, fmt::string_view format, fmt::format_args args) {
+	if (UnlogData::data[mod->getID()][severity]) {
+		log::vlogImpl(severity, mod, format, args);
 	}
+}
+
+$on_mod(Loaded) {
+	Mod* mod = Mod::get();
+	if (!mod->getSaveContainer().contains("unlog-data")) {
+		for (Mod* mod : Loader::get()->getAllMods()) {
+			UnlogData::data[mod->getID()] = mod->getSavedValue(mod->getID(), true);
+		}
+		mod->setSavedValue("unlog-data", UnlogData::data);
+	}
+	else {
+		UnlogData::data = mod->getSavedValue<UnlogData::Map>("unlog-data");
+	}
+
+	(void) mod->hook(
+		reinterpret_cast<void*>(addresser::getNonVirtual(&log::vlogImpl)),
+		&vlogImplHook,
+		"geode::log::vlogImpl"
+	);
 }
