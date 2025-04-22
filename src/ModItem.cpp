@@ -158,7 +158,7 @@ void ModItem::onToggle(CCObject* sender){
     auto toggled = !static_cast<CCMenuItemToggler*>(sender)->isToggled();
     #ifdef GEODE_IS_ARM_MAC
     m_mod->setLoggingEnabled(toggled);
-    Mod::get()->setSavedValue(Mod::get()->getID(), toggled);
+    Mod::get()->setSavedValue(m_mod->getID(), toggled);
     #else
     UnlogData::data->operator[](m_mod->getID()).get(sender->getTag()) = toggled;
     #endif
